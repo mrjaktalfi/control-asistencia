@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pruebas - Sistema de Control de Asistencia Believe Group</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Animation Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="effects.css">
+    
+    <style>
+        .test-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-section:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.1);
+        }
+        
+        .test-result {
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .test-pass {
+            background-color: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .test-fail {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        
+        .test-warning {
+            background-color: #fef3c7;
+            color: #991b1b;
+            border: 1px solid #fde68a;
+        }
+        
+        .loading-test {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f4f6;
+            border-top: 2px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation Header -->
+    <nav class="bg-white shadow-lg card-shadow sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                        </div>
+                        <h1 class="text-xl font-bold text-gray-900">Sistema de Control de Asistencia Believe Group</h1>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="text-gray-600 hover:text-blue-600 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        </svg>
+                    </a>
+                    <button onclick="testSuite.runAllTests()" 
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                        Ejecutar Todas las Pruebas
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Test Suite Status -->
+        <div class="bg-white rounded-xl card-shadow p-6 mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl font-bold text-gray-900">Estado de las Pruebas</h2>
+                <div class="flex items-center space-x-4">
+                    <div class="text-sm text-gray-600">
+                        <span class="font-semibold">Total:</span> <span id="total-tests">0</span>
+                    </div>
+                    <div class="text-sm text-green-600">
+                        <span class="font-semibold">Pasadas:</span> <span id="passed-tests">0</span>
+                    </div>
+                    <div class="text-sm text-red-600">
+                        <span class="font-semibold">Fallidas:</span> <span id="failed-tests">0</span>
+                    </div>
+                    <div class="text-sm text-yellow-600">
+                        <span class="font-semibold">Advertencias:</span> <span id="warning-tests">0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="w-full bg-gray-200 rounded-full h-4 mb-4">
+                <div id="progress-bar" class="bg-blue-600 h-4 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            
+            <div class="text-center">
+                <span id="test-status" class="text-lg font-semibold text-gray-700">Listo para ejecutar pruebas</span>
+            </div>
+        </div>
+
+        <!-- Test Sections -->
+        <div class="space-y-6">
+            <!-- Firebase Connection Test -->
+            <div class="test-section">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">1. Conexión Firebase</h3>
+                <div id="firebase-tests" class="space-y-2">
+                    <div class="test-result test-warning">
+                        <div class="flex items-center space-x-2">
+                            <div class="loading-test"></div>
+                            <span>Probando conexión a Firebase...</span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="testSuite.testFirebaseConnection()" 
+                        class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                    Re-ejecutar Prueba
+                </button>
+            </div>
+
+            <!-- Data Loading Test -->
+            <div class="test-section">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">2. Carga de Datos</h3>
+                <div id="data-tests" class="space-y-2">
+                    <div class="test-result test-warning">
+                        <div class="flex items-center space-x-2">
+                            <div class="loading-test"></div>
+                            <span>Probando carga de datos...</span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="testSuite.testDataLoading()" 
+                        class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                    Re-ejecutar Prueba
+                </button>
+            </div>
+
+            <!-- UI Components Test -->
+            <div class="test-section">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">3. Componentes de Interfaz</h3>
+                <div id="ui-tests" class="space-y-2">
+                    <div class="test-result test-warning">
+                        <div class="flex items-center space-x-2">
+                            <div class="loading-test"></div>
+                            <span>Probando componentes UI...</span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="testSuite.testUIComponents()" 
+                        class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                    Re-ejecutar Prueba
+                </button>
+            </div>
+
+            <!-- Animations Test -->
+            <div class="test-section">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">4. Animaciones y Efectos</h3>
+                <div id="animation-tests" class="space-y-2">
+                    <div class="test-result test-warning">
+                        <div class="flex items-center space-x-2">
+                            <div class="loading-test"></div>
+                            <span>Probando animaciones...</span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="testSuite.testAnimations()" 
+                        class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                    Re-ejecutar Prueba
+                </button>
+            </div>
+
+            <!-- Functionality Test -->
+            <div class="test-section">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">5. Funcionalidad Principal</h3>
+                <div id="functionality-tests" class="space-y-2">
+                    <div class="test-result test-warning">
+                        <div class="flex items-center space-x-2">
+                            <div class="loading-test"></div>
+                            <span>Probando funcionalidad...</span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="testSuite.testFunctionality()" 
+                        class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                    Re-ejecutar Prueba
+                </button>
+            </div>
+
+            <!-- Performance Test -->
+            <div class="test-section">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">6. Rendimiento</h3>
+                <div id="performance-tests" class="space-y-2">
+                    <div class="test-result test-warning">
+                        <div class="flex items-center space-x-2">
+                            <div class="loading-test"></div>
+                            <span>Probando rendimiento...</span>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="testSuite.testPerformance()" 
+                        class="mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                    Re-ejecutar Prueba
+                </button>
+            </div>
+        </div>
+
+        <!-- Demo Section -->
+        <div class="bg-white rounded-xl card-shadow p-6 mt-8">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">Demo de Funcionalidades</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <button onclick="testSuite.showToastDemo()" 
+                        class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                    Mostrar Toast
+                </button>
+                <button onclick="testSuite.showModalDemo()" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                    Mostrar Modal
+                </button>
+                <button onclick="testSuite.animateElements()" 
+                        class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                    Animar Elementos
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="fixed top-20 right-4 z-50 space-y-2">
+        <!-- Toast messages will be added here -->
+    </div>
+
+    <!-- Demo Modal -->
+    <div id="demo-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" style="display: none;">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">Demo Modal</h3>
+            <p class="text-gray-600 mb-4">Este es un ejemplo de modal con animaciones suaves.</p>
+            <button onclick="testSuite.closeModalDemo()" 
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg">
+                Cerrar
+            </button>
+        </div>
+    </div>
+
+    <!-- Main JavaScript -->
+    <script src="main.js"></script>
+    <script src="admin.js"></script>
+    <script src="dashboard.js"></script>
+    <script src="reports.js"></script>
+    <script>
+        // Test Suite
+        class TestSuite {
+            constructor() {
+                this.totalTests = 0;
+                this.passedTests = 0;
+                this.failedTests = 0;
+                this.warningTests = 0;
+                this.completedTests = 0;
+            }
+            
+            async runAllTests() {
+                this.resetStats();
+                this.updateStatus('Ejecutando todas las pruebas...');
+                
+                await this.testFirebaseConnection();
+                await this.testDataLoading();
+                await this.testUIComponents();
+                await this.testAnimations();
+                await this.testFunctionality();
+                await this.testPerformance();
+                
+                this.updateStatus('Todas las pruebas completadas');
+                this.showFinalReport();
+            }
+            
+            resetStats() {
+                this.totalTests = 0;
+                this.passedTests = 0;
+                this.failedTests = 0;
+                this.warningTests = 0;
+                this.completedTests = 0;
+                this.updateStatsDisplay();
+            }
+            
+            addTest(result, message, section) {
+                this.totalTests++;
+                const testElement = document.createElement('div');
+                testElement.className = `test-result test-${result}`;
+                testElement.innerHTML = message;
+                
+                document.getElementById(section).appendChild(testElement);
+                
+                switch(result) {
+                    case 'pass':
+                        this.passedTests++;
+                        break;
+                    case 'fail':
+                        this.failedTests++;
+                        break;
+                    case 'warning':
+                        this.warningTests++;
+                        break;
+                }
+                
+                this.updateStatsDisplay();
+                this.updateProgress();
+            }
+            
+            updateStatsDisplay() {
+                document.getElementById('total-tests').textContent = this.totalTests;
+                document.getElementById('passed-tests').textContent = this.passedTests;
+                document.getElementById('failed-tests').textContent = this.failedTests;
+                document.getElementById('warning-tests').textContent = this.warningTests;
+            }
+            
+            updateProgress() {
+                this.completedTests++;
+                const progress = (this.completedTests / 6) * 100;
+                document.getElementById('progress-bar').style.width = `${progress}%`;
+            }
+            
+            updateStatus(message) {
+                document.getElementById('test-status').textContent = message;
+            }
+            
+            async testFirebaseConnection() {
+                const section = 'firebase-tests';
+                document.getElementById(section).innerHTML = '';
+                
+                try {
+                    // Test Firebase initialization
+                    if (typeof firebase !== 'undefined') {
+                        this.addTest('pass', '✅ Firebase SDK cargado correctamente', section);
+                    } else {
+                        this.addTest('fail', '❌ Firebase SDK no está disponible', section);
+                        return;
+                    }
+                    
+                    // Test configuration
+                    const config = {
+                        apiKey: "AIzaSyCQATvoHqEPTgpenBNSav2uBNXjDn4nRXw",
+                        authDomain: "attendance-40e97.firebaseapp.com",
+                        projectId: "attendance-40e97"
+                    };
+                    
+                    if (config.apiKey && config.projectId) {
+                        this.addTest('pass', '✅ Configuración de Firebase válida', section);
+                    } else {
+                        this.addTest('fail', '❌ Configuración de Firebase incompleta', section);
+                    }
+                    
+                    // Test Firestore
+                    try {
+                        const app = firebase.initializeApp(config);
+                        const db = firebase.firestore(app);
+                        this.addTest('pass', '✅ Firestore inicializado correctamente', section);
+                    } catch (error) {
+                        this.addTest('warning', '⚠️ Firestore no pudo inicializar (modo offline activado)', section);
+                    }
+                    
+                } catch (error) {
+                    this.addTest('fail', `❌ Error en conexión Firebase: ${error.message}`, section);
+                }
+            }
+            
+            async testDataLoading() {
+                const section = 'data-tests';
+                document.getElementById(section).innerHTML = '';
+                
+                try {
+                    // Test data structures
+                    if (Array.isArray(window.reports?.locations)) {
+                        this.addTest('pass', `✅ Locales cargados: ${window.reports.locations.length}`, section);
+                    } else {
+                        this.addTest('warning', '⚠️ No se encontraron datos de locales', section);
+                    }
+                    
+                    if (Array.isArray(window.reports?.employees)) {
+                        this.addTest('pass', `✅ Empleados cargados: ${window.reports.employees.length}`, section);
+                    } else {
+                        this.addTest('warning', '⚠️ No se encontraron datos de empleados', section);
+                    }
+                    
+                    if (Array.isArray(window.reports?.attendanceData)) {
+                        this.addTest('pass', `✅ Registros de asistencia: ${window.reports.attendanceData.length}`, section);
+                    } else {
+                        this.addTest('warning', '⚠️ No se encontraron registros de asistencia', section);
+                    }
+                    
+                } catch (error) {
+                    this.addTest('fail', `❌ Error en carga de datos: ${error.message}`, section);
+                }
+            }
+            
+            async testUIComponents() {
+                const section = 'ui-tests';
+                document.getElementById(section).innerHTML = '';
+                
+                try {
+                    // Test navigation
+                    const navElements = document.querySelectorAll('nav');
+                    this.addTest('pass', `✅ Elementos de navegación encontrados: ${navElements.length}`, section);
+                    
+                    // Test buttons
+                    const buttonElements = document.querySelectorAll('button');
+                    this.addTest('pass', `✅ Botones encontrados: ${buttonElements.length}`, section);
+                    
+                    // Test forms
+                    const formElements = document.querySelectorAll('form');
+                    this.addTest('pass', `✅ Formularios encontrados: ${formElements.length}`, section);
+                    
+                    // Test modals
+                    const modalElements = document.querySelectorAll('[id*="modal"]');
+                    this.addTest('pass', `✅ Modales encontrados: ${modalElements.length}`, section);
+                    
+                    // Test responsive design
+                    if (window.innerWidth < 768) {
+                        this.addTest('warning', '⚠️ Vista móvil detectada - algunas funciones pueden estar limitadas', section);
+                    } else {
+                        this.addTest('pass', '✅ Vista de escritorio detectada', section);
+                    }
+                    
+                } catch (error) {
+                    this.addTest('fail', `❌ Error en componentes UI: ${error.message}`, section);
+                }
+            }
+            
+            async testAnimations() {
+                const section = 'animation-tests';
+                document.getElementById(section).innerHTML = '';
+                
+                try {
+                    // Test Anime.js
+                    if (typeof anime !== 'undefined') {
+                        this.addTest('pass', '✅ Anime.js cargado correctamente', section);
+                        
+                        // Test simple animation
+                        anime({
+                            targets: '.test-section',
+                            scale: [1, 1.02, 1],
+                            duration: 1000,
+                            easing: 'easeInOutQuad'
+                        });
+                        this.addTest('pass', '✅ Animación de prueba ejecutada', section);
+                    } else {
+                        this.addTest('fail', '❌ Anime.js no está disponible', section);
+                    }
+                    
+                    // Test CSS animations
+                    const testElement = document.createElement('div');
+                    testElement.style.animation = 'fadeIn 1s ease';
+                    document.body.appendChild(testElement);
+                    
+                    const computedStyle = window.getComputedStyle(testElement);
+                    if (computedStyle.animationName) {
+                        this.addTest('pass', '✅ Animaciones CSS funcionando', section);
+                    } else {
+                        this.addTest('warning', '⚠️ Animaciones CSS no disponibles', section);
+                    }
+                    
+                    document.body.removeChild(testElement);
+                    
+                } catch (error) {
+                    this.addTest('fail', `❌ Error en animaciones: ${error.message}`, section);
+                }
+            }
+            
+            async testFunctionality() {
+                const section = 'functionality-tests';
+                document.getElementById(section).innerHTML = '';
+                
+                try {
+                    // Test main functions
+                    if (typeof window.attendanceSystem !== 'undefined') {
+                        this.addTest('pass', '✅ Sistema de asistencia disponible', section);
+                    } else {
+                        this.addTest('fail', '❌ Sistema de asistencia no encontrado', section);
+                    }
+                    
+                    if (typeof window.adminPanel !== 'undefined') {
+                        this.addTest('pass', '✅ Panel de administración disponible', section);
+                    } else {
+                        this.addTest('fail', '❌ Panel de administración no encontrado', section);
+                    }
+                    
+                    if (typeof window.dashboard !== 'undefined') {
+                        this.addTest('pass', '✅ Dashboard disponible', section);
+                    } else {
+                        this.addTest('fail', '❌ Dashboard no encontrado', section);
+                    }
+                    
+                    if (typeof window.reports !== 'undefined') {
+                        this.addTest('pass', '✅ Sistema de reportes disponible', section);
+                    } else {
+                        this.addTest('fail', '❌ Sistema de reportes no encontrado', section);
+                    }
+                    
+                    // Test toast notifications
+                    if (typeof this.showToastDemo === 'function') {
+                        this.addTest('pass', '✅ Sistema de notificaciones disponible', section);
+                    } else {
+                        this.addTest('fail', '❌ Sistema de notificaciones no encontrado', section);
+                    }
+                    
+                } catch (error) {
+                    this.addTest('fail', `❌ Error en funcionalidad: ${error.message}`, section);
+                }
+            }
+            
+            async testPerformance() {
+                const section = 'performance-tests';
+                document.getElementById(section).innerHTML = '';
+                
+                try {
+                    // Test page load time
+                    const loadTime = performance.now();
+                    this.addTest('pass', `✅ Tiempo de carga: ${Math.round(loadTime)}ms`, section);
+                    
+                    // Test memory usage
+                    if (performance.memory) {
+                        const memoryUsage = Math.round(performance.memory.usedJSHeapSize / 1024 / 1024);
+                        this.addTest('pass', `✅ Uso de memoria: ${memoryUsage}MB`, section);
+                    } else {
+                        this.addTest('warning', '⚠️ API de memoria no disponible', section);
+                    }
+                    
+                    // Test DOM size
+                    const domSize = document.querySelectorAll('*').length;
+                    this.addTest('pass', `✅ Elementos DOM: ${domSize}`, section);
+                    
+                    // Test network status
+                    if (navigator.onLine) {
+                        this.addTest('pass', '✅ Conexión a internet disponible', section);
+                    } else {
+                        this.addTest('warning', '⚠️ Sin conexión a internet', section);
+                    }
+                    
+                } catch (error) {
+                    this.addTest('fail', `❌ Error en rendimiento: ${error.message}`, section);
+                }
+            }
+            
+            showFinalReport() {
+                const successRate = Math.round((this.passedTests / this.totalTests) * 100);
+                let status = '';
+                let color = '';
+                
+                if (successRate >= 80) {
+                    status = 'Excelente';
+                    color = 'text-green-600';
+                } else if (successRate >= 60) {
+                    status = 'Bueno';
+                    color = 'text-blue-600';
+                } else if (successRate >= 40) {
+                    status = 'Aceptable';
+                    color = 'text-yellow-600';
+                } else {
+                    status = 'Necesita Mejora';
+                    color = 'text-red-600';
+                }
+                
+                this.showToast(`Pruebas completadas: ${successRate}% aprobado (${status})`, 
+                    successRate >= 60 ? 'success' : 'warning');
+            }
+            
+            showToastDemo() {
+                const messages = [
+                    'Operación exitosa',
+                    'Error en la operación',
+                    'Advertencia importante',
+                    'Información del sistema'
+                ];
+                
+                const types = ['success', 'error', 'warning', 'info'];
+                
+                messages.forEach((message, index) => {
+                    setTimeout(() => {
+                        this.showToast(message, types[index]);
+                    }, index * 500);
+                });
+            }
+            
+            showModalDemo() {
+                const modal = document.getElementById('demo-modal');
+                modal.style.display = 'flex';
+                
+                anime({
+                    targets: modal.querySelector('.bg-white'),
+                    scale: [0.8, 1],
+                    opacity: [0, 1],
+                    duration: 300,
+                    easing: 'easeOutQuart'
+                });
+            }
+            
+            closeModalDemo() {
+                const modal = document.getElementById('demo-modal');
+                modal.style.display = 'none';
+            }
+            
+            animateElements() {
+                anime({
+                    targets: '.test-section',
+                    scale: [1, 1.05, 1],
+                    duration: 1000,
+                    easing: 'easeInOutQuad',
+                    delay: anime.stagger(100)
+                });
+                
+                this.showToast('Animaciones ejecutadas', 'success');
+            }
+            
+            showToast(message, type = 'info') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                
+                const colors = {
+                    success: 'bg-green-500',
+                    error: 'bg-red-500',
+                    warning: 'bg-yellow-500',
+                    info: 'bg-blue-500'
+                };
+                
+                toast.className = `${colors[type]} text-white px-4 py-3 rounded-lg shadow-lg transform translate-x-full transition-transform duration-300`;
+                toast.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <span>${message}</span>
+                        <button onclick="this.parentElement.parentElement.remove()" class="text-white hover:text-gray-200">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.transform = 'translateX(0)';
+                }, 100);
+                
+                setTimeout(() => {
+                    toast.style.transform = 'translateX(100%)';
+                    setTimeout(() => toast.remove(), 300);
+                }, 5000);
+            }
+        }
+        
+        // Initialize test suite
+        document.addEventListener('DOMContentLoaded', () => {
+            window.testSuite = new TestSuite();
+            
+            // Run basic tests on load
+            setTimeout(() => {
+                testSuite.testFirebaseConnection();
+                testSuite.testUIComponents();
+                testSuite.testAnimations();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

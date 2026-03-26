@@ -1,0 +1,160 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: locations
+    // Document ID: auto-generated
+    // Fields:
+    //   - name: string (required, 1-100 chars)
+    //   - address: string (optional, 0-200 chars)
+    //   - active: boolean (required)
+    //   - color: string (optional, hex color)
+    //
+    // Collection: employees
+    // Document ID: auto-generated
+    // Fields:
+    //   - name: string (required, 1-100 chars)
+    //   - position: string (optional, 0-100 chars)
+    //   - active: boolean (required)
+    //   - avatar: string (optional, url)
+    //
+    // Collection: current_sessions
+    // Document ID: employeeId
+    // Fields:
+    //   - empId: string (required)
+    //   - name: string (required)
+    //   - checkIn: timestamp (required)
+    //   - locationId: string (required)
+    //   - attendanceId: string (required)
+    //
+    // Collection: attendance
+    // Document ID: auto-generated
+    // Fields:
+    //   - employeeId: string (required)
+    //   - employeeName: string (required)
+    //   - locationId: string (required)
+    //   - locationName: string (required)
+    //   - checkIn: timestamp (required)
+    //   - checkOut: timestamp (optional)
+    //   - date: string (required, YYYY-MM-DD)
+    //   - status: string (required, 'active' or 'completed')
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Regla existente para qr_history
+    // ===============================================================
+    match /qr_history/{document=**} {
+      allow read, write: if true;
+    }
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      // ADVERTENCIA: ACCESO PÚBLICO HABILITADO (Solo para pruebas)
+      return true;
+    }
+
+    function isAdmin() {
+      // TODO: Implement proper role-based access control.
+      // For now, any authenticated user acts as admin, which is a prototype placeholder.
+      return isAuthenticated(); 
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function validStringLength(field, minLen, maxLen) {
+      return request.resource.data[field] is string &&
+        request.resource.data[field].size() >= minLen &&
+        request.resource.data[field].size() <= maxLen;
+    }
+
+    function isValidOptionalString(field, minLen, maxLen) {
+      return !(field in request.resource.data) ||
+             (request.resource.data[field] is string &&
+              request.resource.data[field].size() >= minLen &&
+              request.resource.data[field].size() <= maxLen);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidLocation() {
+      return hasRequiredFields(['name', 'active']) &&
+             validStringLength('name', 1, 100) &&
+             request.resource.data.active is bool &&
+             isValidOptionalString('address', 0, 200) &&
+             isValidOptionalString('color', 0, 20);
+    }
+
+    function isValidEmployee() {
+      return hasRequiredFields(['name', 'active']) &&
+             validStringLength('name', 1, 100) &&
+             request.resource.data.active is bool &&
+             isValidOptionalString('position', 0, 100) &&
+             isValidOptionalString('avatar', 0, 500);
+    }
+
+    function isValidSession() {
+      return hasRequiredFields(['empId', 'name', 'checkIn', 'locationId', 'attendanceId']) &&
+             validStringLength('empId', 1, 50) &&
+             validStringLength('name', 1, 100) &&
+             request.resource.data.checkIn is timestamp &&
+             validStringLength('locationId', 1, 50) &&
+             validStringLength('attendanceId', 1, 50);
+    }
+
+    function isValidAttendance() {
+      return hasRequiredFields(['employeeId', 'employeeName', 'locationId', 'locationName', 'checkIn', 'date', 'status']) &&
+             validStringLength('employeeId', 1, 50) &&
+             validStringLength('employeeName', 1, 100) &&
+             validStringLength('locationId', 1, 50) &&
+             validStringLength('locationName', 1, 100) &&
+             request.resource.data.checkIn is timestamp &&
+             validStringLength('date', 10, 10) &&
+             (request.resource.data.status == 'active' || request.resource.data.status == 'completed') &&
+             (!('checkOut' in request.resource.data) || request.resource.data.checkOut is timestamp);
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /locations/{locationId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdmin() && isValidLocation();
+      allow update: if isAdmin() && isValidLocation();
+      allow delete: if isAdmin();
+    }
+
+    match /employees/{employeeId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdmin() && isValidEmployee();
+      allow update: if isAdmin() && isValidEmployee();
+      allow delete: if isAdmin();
+    }
+
+    match /current_sessions/{sessionId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidSession();
+      allow update: if isAuthenticated() && isValidSession();
+      allow delete: if isAuthenticated();
+    }
+
+    match /attendance/{attendanceId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidAttendance();
+      allow update: if isAuthenticated() && isValidAttendance();
+      allow delete: if isAdmin();
+    }
+  }
+}
