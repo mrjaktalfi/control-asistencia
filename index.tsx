@@ -41,41 +41,63 @@ interface PocketBaseErrorInfo {
   }
 }
 
+import {
+  Clock,
+  IdCard as Users,
+  MapPin as Home,
+  SlidersHorizontal as Settings,
+  LayoutDashboard as BarChart,
+  ClipboardList as FileText,
+  Activity,
+  CheckCircle2 as CheckCircle,
+  AlertCircle,
+  LogOut,
+  LogIn,
+  RefreshCw as Refresh,
+  Server as Database,
+  Search,
+  Trash2 as Trash,
+  Printer as Print,
+  Download,
+  Sun,
+  Moon,
+  X,
+  RotateCcw,
+  ShieldCheck
+} from 'lucide-react';
+
 function handlePocketBaseError(error: unknown, operationType: OperationType, path: string | null) {
   console.error('PocketBase Error: ', error, operationType, path);
 }
 
 // --- Icons (SVG Components) ---
 const Icons = {
-    Clock: (props) => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
-    Users: (props) => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" /></svg>,
-    Home: (props) => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>,
-    Settings: (props) => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>,
-    BarChart: (props) => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>,
-    FileText: (props) => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>,
-    Activity: (props) => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>,
-    CheckCircle: (props) => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
-    AlertCircle: (props) => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
-    LogOut: (props) => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>,
-    LogIn: (props) => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>,
-    Refresh: (props) => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>,
-    Database: (props) => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" /></svg>,
-    Search: (props) => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>,
-    Trash: (props) => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>,
-    Print: (props) => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>,
-    Download: (props) => <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>,
-    Sun: (props) => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>,
-    Moon: (props) => <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>,
-    X: (props) => <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>,
+    Clock,
+    Users,
+    Home,
+    Settings,
+    BarChart,
+    FileText,
+    Activity,
+    CheckCircle,
+    AlertCircle,
+    LogOut,
+    LogIn,
+    Refresh,
+    Database,
+    Search,
+    Trash,
+    Print,
+    Download,
+    Sun,
+    Moon,
+    X,
+    RotateCcw,
+    ShieldCheck,
     Logo: (props) => (
         <svg viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
             <text x="10" y="60" style={{ fontFamily: "'Brush Script MT', cursive", fontSize: "60px", fill: "currentColor" }}>Believe</text>
             <text x="55" y="85" style={{ fontFamily: "Arial, sans-serif", fontSize: "15px", letterSpacing: "10px", fill: "currentColor" }}>CLUB</text>
-        </svg>
-    ),
-    RotateCcw: (props) => (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" {...props}>
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
         </svg>
     )
 };
@@ -98,6 +120,7 @@ const Header = ({ currentView, onNavigate, time, toggleTheme, isDark, showNav, o
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     <div className="flex items-center space-x-4 cursor-pointer" onClick={() => onNavigate('home')}>
+                        <Icons.ShieldCheck className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                         <h1 className="text-xl font-bold text-gray-900 dark:text-white">Control de Acceso</h1>
                     </div>
                     
@@ -310,9 +333,26 @@ const Terminal = ({ onNavigate }) => {
                 });
                 
                 // 1. Update the permanent attendance record
-                if (existingSession.attendanceId) {
+                let attId = existingSession.attendanceId;
+                if (!attId) {
+                    console.warn(`[Attendance] attendanceId no encontrado en la sesión. Buscando registro activo...`);
                     try {
-                        const updated = await pb.collection('attendance').update(existingSession.attendanceId, {
+                        const activeRecords = await pb.collection('attendance').getFullList({
+                            filter: `employeeId = "${empId}" && status = "active"`,
+                            sort: '-created',
+                        });
+                        if (activeRecords.length > 0) {
+                            attId = activeRecords[0].id;
+                            console.log(`[Attendance] Registro activo encontrado: ${attId}`);
+                        }
+                    } catch (err) {
+                        console.error("Error buscando registro de asistencia activo:", err);
+                    }
+                }
+
+                if (attId) {
+                    try {
+                        const updated = await pb.collection('attendance').update(attId, {
                             checkOut: new Date().toISOString(),
                             status: 'completed'
                         });
@@ -322,7 +362,7 @@ const Terminal = ({ onNavigate }) => {
                         throw err;
                     }
                 } else {
-                    console.warn(`[Attendance] ¡ADVERTENCIA! No se encontró attendanceId en la sesión activa.`);
+                    console.warn(`[Attendance] ¡ERROR! No se pudo encontrar el registro de asistencia para actualizar la salida.`);
                 }
                 
                 // 2. Remove from active sessions
@@ -1668,28 +1708,26 @@ const App = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col font-sans transition-colors duration-300">
-            {view !== 'home' && (
-                <Header 
-                    currentView={view} 
-                    onNavigate={(v) => {
-                        if (['monitor', 'management', 'reports', 'diagnostics'].includes(v) && !isAdminAuthorized) {
-                            setPendingView(v);
-                            setShowAdminAuth(true);
-                        } else {
-                            setView(v);
-                        }
-                    }} 
-                    time={time} 
-                    toggleTheme={toggleTheme} 
-                    isDark={darkMode} 
-                    showNav={isAdminAuthorized}
-                    onLogout={isAdminAuthorized ? () => {
-                        setIsAdminAuthorized(false);
-                        setPendingView(null);
-                        setView('home');
-                    } : null}
-                />
-            )}
+            <Header 
+                currentView={view} 
+                onNavigate={(v) => {
+                    if (['monitor', 'management', 'reports', 'diagnostics'].includes(v) && !isAdminAuthorized) {
+                        setPendingView(v);
+                        setShowAdminAuth(true);
+                    } else {
+                        setView(v);
+                    }
+                }} 
+                time={time} 
+                toggleTheme={toggleTheme} 
+                isDark={darkMode} 
+                showNav={isAdminAuthorized && view !== 'home'}
+                onLogout={isAdminAuthorized ? () => {
+                    setIsAdminAuthorized(false);
+                    setPendingView(null);
+                    setView('home');
+                } : null}
+            />
             
             <main className="flex-grow relative">
                 {renderView()}
